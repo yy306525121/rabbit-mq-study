@@ -1,5 +1,5 @@
 #acmq消息模型
-![AMQP协议模型](img.codeyang.cn/15433066397613.jpg)
+![AMQP协议模型](http://img.codeyang.cn/15433066397613.jpg)
 
 # RabbitMQ中的Exchange类型
  * RoutingKey: 路由键。生产者将消息发给交换器 的时候， 一般会 指定 一个 RoutingKey，用 来指定这个消息的路由规则，而这个 RoutingKey 需要与交换器类型和绑定键 (BindingKey) 联 合使用才能最终生效。
