@@ -1,3 +1,6 @@
+#acmq消息模型
+![AMQP协议模型](img.codeyang.cn/15433066397613.jpg)
+
 # RabbitMQ中的Exchange类型
  * RoutingKey: 路由键。生产者将消息发给交换器 的时候， 一般会 指定 一个 RoutingKey，用 来指定这个消息的路由规则，而这个 RoutingKey 需要与交换器类型和绑定键 (BindingKey) 联 合使用才能最终生效。
  * Bining: 绑定。 RabbitMQ 中通过绑定将交换器与队列关联起来，在绑定的时候 一般会指定一个绑定键 (BindingKey)，这样 RabbitMQ就知道如何正确地将消息路由到队列了
@@ -30,7 +33,7 @@ channel.addReturnListener(new ReturnListener() {
 * 通过队列属性设置
 * 对消息本身进行单独设置
 
-### 通过队列属性设置TTL
+### 通过队列属性设置消息的TTL
 需要在`channel.queueDeclare`方法中加入`x-message-ttl（毫秒）`参数
 ```
 channel.exchangeDeclare(EXCHANGE_NAME, "direct", true, false, null);
@@ -39,3 +42,27 @@ Map<String, Object> param = new HashMap<>();
 param.put("x-message-ttl", 6000);
 channel.queueDeclare(QUEUE_NAME, true, false, false, param);
 ```
+
+如果不设置TTL表示此消息不会过期，如果将TTL设置为0，则表示除非此时可以直接将消息投递到消费者，否者该消息会被立即丢弃
+### 针对每条消息设置TTL
+```
+AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
+                .expiration("6000")
+                .build();
+channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, properties, message.getBytes());
+```
+### 设置队列的TTL
+队列的x-expires不能设置为0
+```
+ Map<String, Object> param = new HashMap<>();
+param.put("x-expires", 18000);
+channel.queueDeclare(QUEUE_NAME, false, false, false, param);
+```
+
+## 死信队列
+DLX，全称为 Dead-Letter-Exchange，可以称之为死信交换器，也有人称之为死信邮箱。当 消息在一个队列中变成死信 (dead message) 之后，它能被重新被发送到另一个交换器中，这个 交换器就是 DLX，绑定 DLX 的队列就称之为死信队列。
+消息编程死信一般是由于一下几种情况
+* 消息被拒绝（Basic.Reject/Basic.Nack)，并且设置requeue参数为false
+* 消息过期
+* 队列达到最大长度
+

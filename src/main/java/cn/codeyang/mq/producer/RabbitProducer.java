@@ -12,9 +12,9 @@ import java.util.concurrent.TimeoutException;
  * @author yangzhongyang
  */
 public class RabbitProducer {
-    private static final String EXCHANGE_NAME = "exchange_demo2";
-    private static final String ROUTING_KEY = "routing_demo2";
-    private static final String QUEUE_NAME = "queue_demo2";
+    private static final String EXCHANGE_NAME = "exchange_demo";
+    private static final String ROUTING_KEY = "routing_demo";
+    private static final String QUEUE_NAME = "queue_demo";
     private static final String IP_ADDRESS = "192.168.1.166";
     private static final int PORT = 5672;
 
@@ -32,12 +32,13 @@ public class RabbitProducer {
         channel.exchangeDeclare(EXCHANGE_NAME, "direct", true, false, null);
         //创建一个持久化、非排他的、非自动删除的队列
         Map<String, Object> param = new HashMap<>();
-        param.put("x-message-ttl", 6000);
-        channel.queueDeclare(QUEUE_NAME, true, false, false, param);
+        param.put("x-expires", 18000);
+        channel.queueDeclare(QUEUE_NAME, false, false, false, param);
         //将交换器与队列通过路由键绑定
         channel.queueBind(QUEUE_NAME, EXCHANGE_NAME, ROUTING_KEY);
         //发送一条持久化的消息: hello world !
         String message = "Hello World";
+
         channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
 
 
